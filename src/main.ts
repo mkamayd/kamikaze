@@ -164,7 +164,7 @@ window.onload = async () => {
 
           /* update position */ {
             const displacement = vectorPool
-              .copy(player.velocity)
+              .clone(player.velocity)
               .multiplyScalar(dt)
             player.position.add(displacement);
           }

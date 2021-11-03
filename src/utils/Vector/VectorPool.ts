@@ -26,7 +26,7 @@ export class VectorPool {
   constructor(initialPoolSize = 0) {
     this._pool = new Array<Vector2D>(initialPoolSize);
     for (let i = 0; i < initialPoolSize; i++) {
-      this._pool[i] = new Vector2D();
+      this._pool[i] = new Vector2D(0, 0, i);
     }
   }
 
@@ -57,17 +57,17 @@ export class VectorPool {
   new(x = 0, y = 0) {
     this._count++
     if (this.size < this.count) {
-      this._pool.push(new Vector2D());
+      this._pool.push(new Vector2D(x, y, this.count - 1));
     }
     return this._pool[this.count - 1].set(x, y);
   }
 
   /**
-  Provides a vector that's a copy of another.
-  @param vector The vector to copy from.
-  @returns The provided vector.
+  Provides a vector that's a clone of another.
+  @param vector The vector to be cloned.
+  @returns The cloned vector.
   */
-  copy(vector: Vector2D) {
+  clone(vector: Vector2D) {
     return this.new().copy(vector);
   }
 
@@ -95,5 +95,20 @@ export class VectorPool {
   */
   clear() {
     this._count = 0;
+  }
+
+  clear_index(index:number) {
+    if (index < 0 || index >= this._count){
+      throw 'Index out of bound'
+    }
+    if (this._count == 0){
+      throw 'Pool is already cleared'
+    }
+    if (index + 1 < this._count){
+      this._pool[index]._pool_index = undefined
+      this._pool[index] = this._pool[this._count-1]
+      this._pool[index]._pool_index = index;
+    }
+    this._count--;
   }
 }

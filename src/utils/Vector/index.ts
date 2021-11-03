@@ -29,10 +29,13 @@ export class Vector2D {
   /** `y` component of the vector.*/
   y: number;
 
+  _pool_index:number|undefined;
+
   /** Creates and initialize and instance of the vector class.*/
-  constructor(x = 0, y = 0) {
+  constructor(x = 0, y = 0, pool_index:number|undefined=undefined) {
     this.x = x;
     this.y = y;
+    this._pool_index = pool_index;
   }
 
   /**
@@ -378,7 +381,7 @@ export class Vector2D {
   */
   directionTo(vector: Vector2D) {
     return this.copy(
-      vectorPool.copy(vector).subtract(this).normalize()
+      vectorPool.clone(vector).subtract(this).normalize()
     )
   }
 
@@ -391,7 +394,7 @@ export class Vector2D {
   @returns The modified `this` vector.
   */
   reflect(normal: Vector2D) {
-    const normalizedNormal = vectorPool.copy(normal).normalize();
+    const normalizedNormal = vectorPool.clone(normal).normalize();
     return this.copy(
       normalizedNormal.
         multiplyScalar(2 * this.dot(normalizedNormal))
@@ -431,7 +434,7 @@ export class Vector2D {
   @result The modified `this` vector.
   */
   moveToward(vector: Vector2D, delta: number) {
-    const distanceVector = vectorPool.copy(vector).subtract(this);
+    const distanceVector = vectorPool.clone(vector).subtract(this);
 
     if (distanceVector.length() < delta)
       return this.copy(vector);
@@ -448,7 +451,7 @@ export class Vector2D {
   */
   project(vector: Vector2D) {
     return this.copy(
-      vectorPool.copy(vector).multiplyScalar(this.dot(vector) / vector.lengthSq())
+      vectorPool.clone(vector).multiplyScalar(this.dot(vector) / vector.lengthSq())
     );
   }
 
@@ -460,10 +463,14 @@ export class Vector2D {
   orthogonal() {
     return this.set(this.y, -this.x);
   }
+
+  clear(){
+    if (this._pool_index == undefined){
+      throw 'Clearing a non pool associated vector';
+    }
+    vectorPool.clear_index(this._pool_index);
+  }
 }
 
 /** Global vector pool to manage the memory allocation of vectors*/
 export const vectorPool = new VectorPool(10);
-
-
-
